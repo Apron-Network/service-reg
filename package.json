@@ -149,6 +149,9 @@
     "resetMocks": true
   },
   "devDependencies": {
+    "@polkadot/api": "^6.0.5",
+    "@polkadot/api-contract": "^6.0.5",
+    "@polkadot/extension-dapp": "^0.40.3",
     "antd": "^4.16.13",
     "babel-plugin-styled-components": "^1.13.2",
     "font-awesome": "^4.7.0"

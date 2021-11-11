@@ -10,6 +10,8 @@ import Btm from './components/btm';
 import styled from "styled-components";
 import {HashRouter as Router} from "react-router-dom";
 
+import { SubstrateContextProvider } from "./api/contracts";
+
 const MainBrdr = styled.div`
   display: flex;
   justify-content: space-between;
@@ -31,21 +33,22 @@ const HomeB = styled.div`
 
 function App() {
     return (
-        <Router>
-            <MainBrdr>
-                <NavBar />
-                <Rht>
-                    <HeaderTop />
-                    <HomeB>
-                        <Routerlink />
-                    </HomeB>
-                    <Btm />
-                </Rht>
-                <GlobalStyle/>
+        <SubstrateContextProvider>
+            <Router>
+                <MainBrdr>
+                    <NavBar />
+                    <Rht>
+                        <HeaderTop />
+                        <HomeB>
+                            <Routerlink />
+                        </HomeB>
+                        <Btm />
+                    </Rht>
+                    <GlobalStyle/>
 
-            </MainBrdr>
-        </Router>
-
+                </MainBrdr>
+            </Router>
+        </SubstrateContextProvider>
 );
 }
 

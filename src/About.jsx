@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import styled from "styled-components";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { Modal } from 'antd';
 
 
@@ -111,10 +111,19 @@ const About = ()=>{
     const navigate = useNavigate();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [imgUrl, setimgUrl] = useState('');
+    const { id } = useParams();
+
+    useEffect(()=>{
+        // if(pathname.indexOf("edit")>-1){
+        //     let arr = pathname.split('/');
+        //     let id = arr[arr.length-1];
+        //     setNavid(id)
+        // }
+        console.log("about",id)
+    },[id])
 
     const ToEdit = () => {
-
-        navigate('/edit')
+        navigate(`/edit/${id}`)
     }
 
     const showModal = () => {
@@ -140,7 +149,7 @@ const About = ()=>{
                 <img src="https://img1.baidu.com/it/u=2353090175,990247533&fm=26&fmt=auto" alt=""/>
                 <Titles>
                     <TitleB>
-                        Add New Postfsf
+                        Add New Postfsf-{id}
                     </TitleB>
                     <div>created at 2021-11-10</div>
                     <div>updated at 2021-11-10</div>

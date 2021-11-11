@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState,useEffect} from "react";
 import styled from "styled-components";
 import LogoImg from "../assets/images/apron_logo.svg"
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams,useLocation} from "react-router-dom";
 
 const NavBrdr = styled.div`
   width: 16.6666667%;
@@ -52,6 +52,7 @@ const Setting = styled.div`
   font-size: 16px;
   height: 70px;
   box-sizing: border-box;
+  cursor: pointer;
 color: #007bff;
   i{
   margin-right: 10px;
@@ -66,7 +67,7 @@ const AddBar = styled.div`
    height: 80px;
   box-sizing: border-box;
   text-transform: uppercase;
-  
+  cursor: pointer;
   i{
   margin-right: 10px;
   }
@@ -75,9 +76,23 @@ const AddBar = styled.div`
 
 const NavBar = ()=>{
     const navigate = useNavigate();
+    const { id } = useParams();
+    const { pathname } = useLocation();
+    const [navid, setNavid] = useState('123');
 
-    const ToUrl = (url) => {
-        navigate(url)
+    useEffect(()=>{
+        if(pathname.indexOf("about")>-1){
+            let arr = pathname.split('/');
+            let id = arr[arr.length-1];
+            setNavid(id)
+        }
+    },[pathname])
+    const ToUrl = (url,id) => {
+        if(id){
+            navigate(`${url}/${id}`);
+        }else{
+            navigate(url)
+        }
     }
 
     return  <NavBrdr>
@@ -86,12 +101,13 @@ const NavBar = ()=>{
                 <img src={LogoImg} alt=""/>
                 <div className="logoTit">Gw Panel</div>
             </Logo>
-            <AddBar>
-                <i className="fa fa-plus-square-o" />Create</AddBar>
+            <AddBar onClick={()=>ToUrl('/add')}>
+                <i className="fa fa-plus-square-o" />Create
+            </AddBar>
             <Lft>
-                <li className="active">service1</li>
-                <li>service1</li>
-                <li>service1</li>
+                <li className={navid === '123'?'active': ''} onClick={()=>ToUrl('/about','123')}>service1</li>
+                <li className={navid === '456'?'active': ''}  onClick={()=>ToUrl('/about','456')}>service1</li>
+                <li className={navid === '789'?'active': ''} onClick={()=>ToUrl('/about','789')}>service1</li>
                 <li>service1</li>
             </Lft>
         </div>
@@ -99,6 +115,7 @@ const NavBar = ()=>{
            <i className="fa fa-gear" />
             setting
         </Setting>
+
     </NavBrdr>;
 };
 export default  NavBar;

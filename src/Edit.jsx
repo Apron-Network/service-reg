@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 
 import { Input,Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useParams,useLocation } from 'react-router-dom';
 
 const { TextArea } = Input;
 
@@ -73,12 +73,28 @@ const ServiceLogo = styled.div`
     font-size: 26px;
 `
 
-const Edit = ()=>{
+const Edit = (props)=>{
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const [imgUrl, setimgUrl] = useState('');
+    const { id } = useParams();
+
+    useEffect(()=>{
+        // if(pathname.indexOf("edit")>-1){
+        //     let arr = pathname.split('/');
+        //     let id = arr[arr.length-1];
+        //     setNavid(id)
+        // }
+        console.log(id)
+    },[id])
 
     const ToHome = () => {
-        navigate('/')
+        if(id){
+            navigate(`/about/${id}`)
+        }else{
+            navigate(`/`)
+        }
+
     }
     return  <div>
         <HeaderS>
