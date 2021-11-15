@@ -1,9 +1,16 @@
-import React, { useState }  from "react";
+import React, { useState,useEffect }  from "react";
 import styled from "styled-components";
 import { useSubstrate } from "../api/contracts";
 import Accounts from '../api/Account';
+import apiInterface from '../api/api';
+import { Button, Select, Alert } from 'antd';
 
-import { Button,Select } from 'antd';
+const AlertBg = styled(Alert)`
+    position: fixed;
+    top:60px;
+    width: 100%;
+    z-index: 99;
+`
 
 const RhtTop = styled.div`
   height: 60px;
@@ -21,6 +28,7 @@ const RhtTop = styled.div`
 
 const SelectWidth = styled(Select)`
   width: 200px;
+  position: relative;
 `;
 
 const Addr = styled.div`
@@ -35,10 +43,24 @@ const Logout = styled.span`
 `;
 
 const HeaderTop = ()=>{
-    const { state, dispatch } = useSubstrate();
+    const { dispatch, state } = useSubstrate();
+    const { errorTips,allAccounts } = state;
 
     const [allList, setallList] = useState([]);
     const [selected, setselected] = useState([]);
+
+
+    useEffect(()=>{
+        apiInterface.getList().then(data=>{
+            dispatch({ type: 'SERVICE_LIST', payload: data });
+        })
+    },[]);
+    useEffect(() => {
+        let selectedStorage = JSON.parse(sessionStorage.getItem('account'));
+        if (selectedStorage) {
+            setselected(selectedStorage)
+        }
+    }, []);
 
     const connectWallet = async () => {
         const accoutlist = await Accounts.accountlist();
@@ -55,45 +77,49 @@ const HeaderTop = ()=>{
     const selectAccounts = async (val) => {
         let selected = allList.filter(i => i.address === val);
         setselected(selected);
+        sessionStorage.setItem("account",JSON.stringify(selected));
         dispatch({ type: 'SET_ALLACCOUNTS', payload: selected });
+        dispatch({ type: 'SHOW_ERROR', payload: null });
     }
 
     const exitAccount = () => {
         // sessionStorage.removeItem('account');
         dispatch({ type: 'LOAD_ALLACCOUNTS' });
         setselected([]);
-        // createHashHistory.push('/home');
         window.location.reload()
 
     }
-    return  <RhtTop>
+    return <div>
         {
-            !allList.length && <Button type="primary" onClick={() => connectWallet()}>Connect Wallet</Button>
+             errorTips!=null &&  <AlertBg message="Error" type="error" message={errorTips} showIcon />
         }
-        {!!selected.length &&
+        <RhtTop>
+            {
+                !selected.length && !allList.length && <Button type="primary" onClick={() => connectWallet()}>Connect Wallet</Button>
+            }
+            {!!selected.length &&
             <Addr>Hi, <span>{selected[0].meta.name}</span>
                 <i className="fa fa-database" />
                 {AddresstoShow(selected[0].address)}
             </Addr>
-        }
-        {
-            !selected.length && <div>
-                {
-                    !!allList.length &&<SelectWidth onChange={selectAccounts}>
-                        {
-                            allList && allList.length && allList.map((opt) =><Select.Option value={opt.address} key={opt.address}>{opt.meta.name}</Select.Option>)
-                        }
-                    </SelectWidth>
-                }
-            </div>
-        }
-        {
-            !!selected.length && <Logout onClick={() => exitAccount()}>
-                Logout
-            </Logout>
-        }
-
-
-    </RhtTop>;
+            }
+            {
+                !selected.length && <div>
+                    {
+                        !!allList.length &&<SelectWidth onChange={selectAccounts}>
+                            {
+                                allList && allList.length && allList.map((opt) =><Select.Option value={opt.address} key={opt.address}>{opt.meta.name}</Select.Option>)
+                            }
+                        </SelectWidth>
+                    }
+                </div>
+            }
+            {
+                !!selected.length && <Logout onClick={() => exitAccount()}>
+                    Logout
+                </Logout>
+            }
+        </RhtTop>
+        </div> ;
 };
 export default  HeaderTop;

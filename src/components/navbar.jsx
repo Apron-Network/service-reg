@@ -2,9 +2,11 @@ import React, { useState,useEffect} from "react";
 import styled from "styled-components";
 import LogoImg from "../assets/images/apron_logo.svg"
 import {useNavigate, useParams,useLocation} from "react-router-dom";
+import {useSubstrate} from "../api/contracts";
 
 const NavBrdr = styled.div`
   width: 16.6666667%;
+  min-width: 250px;
   background: #fff;
   box-shadow: 0 0.125rem 9.375rem rgb(90 97 105 / 10%), 0 0.25rem 0.5rem rgb(90 97 105 / 12%), 0 0.9375rem 1.375rem rgb(90 97 105 / 10%), 0 0.4375rem 2.1875rem rgb(165 182 201 / 10%);
   z-index: 9;
@@ -71,28 +73,54 @@ const AddBar = styled.div`
   i{
   margin-right: 10px;
   }
-    //color: #ffffff;
 `
 
 const NavBar = ()=>{
     const navigate = useNavigate();
     const { id } = useParams();
     const { pathname } = useLocation();
-    const [navid, setNavid] = useState('123');
+
+    const { state,dispatch } = useSubstrate();
+    const {serviceList, allAccounts} = state;
+    const [navid, setNavid] = useState('');
+    const [list, setList] = useState([
+        {
+           id:'',
+           name:''
+        }
+    ]);
 
     useEffect(()=>{
         if(pathname.indexOf("about")>-1){
             let arr = pathname.split('/');
             let id = arr[arr.length-1];
+            if(id === 'about' ||id === '' ){
+                ToUrl('/about','456')
+                return;
+            }
             setNavid(id)
         }
-    },[pathname])
+    },[pathname]);
+
+    useEffect(()=>{
+        if(serviceList == null) return;
+        setList(serviceList)
+    },[serviceList]);
+
     const ToUrl = (url,id) => {
+
         if(id){
             navigate(`${url}/${id}`);
         }else{
             navigate(url)
         }
+    }
+    const ToAdd = (url) => {
+        if(allAccounts == null){
+            dispatch({ type: 'SHOW_ERROR', payload: 'Please connect wallet!' });
+            return;
+        }
+        ToUrl(url)
     }
 
     return  <NavBrdr>
@@ -101,14 +129,18 @@ const NavBar = ()=>{
                 <img src={LogoImg} alt=""/>
                 <div className="logoTit">Gw Panel</div>
             </Logo>
-            <AddBar onClick={()=>ToUrl('/add')}>
-                <i className="fa fa-plus-square-o" />Create
+            <AddBar onClick={()=>ToAdd('/add')}>
+                <i className="fa fa-plus-square-o" /> Create
             </AddBar>
             <Lft>
-                <li className={navid === '123'?'active': ''} onClick={()=>ToUrl('/about','123')}>service1</li>
+                {
+                    !!list.length && list.map(item=>(
+                        <li key={item.id} className={navid === item.id?'active': ''} onClick={()=>ToUrl('/about',item.id)}>{item.name}</li>
+                    ))
+                }
+
                 <li className={navid === '456'?'active': ''}  onClick={()=>ToUrl('/about','456')}>service1</li>
                 <li className={navid === '789'?'active': ''} onClick={()=>ToUrl('/about','789')}>service1</li>
-                <li>service1</li>
             </Lft>
         </div>
         <Setting onClick={()=>ToUrl('/setting')}>

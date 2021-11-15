@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 
 import { Input,Button } from 'antd';
@@ -58,20 +58,61 @@ const BtnGroup = styled.div`
       height: 40px;
    }
 `;
+const InputText = styled.div`
+   opacity: 0.6;
+`
 
 const Setting = ()=>{
     const navigate = useNavigate();
+    const [show, setShow] = useState(false);
+    const [rpc, setRpc] = useState(null);
+    const [api, setApi] = useState(null);
 
     const ToHome = () => {
         navigate('/')
     }
+
+    useEffect(()=>{
+        let myLocal = localStorage.getItem('localSetting');
+        if(myLocal == null) return;
+        let myLocalObj = JSON.parse(myLocal);
+
+        setRpc(myLocalObj.rpc);
+        setApi(myLocalObj.api);
+        setShow(true);
+    },[]);
+
+    const confirmSave = () =>{
+        setShow(true);
+        let obj = {
+            api,
+            rpc
+        };
+        localStorage.setItem('localSetting',JSON.stringify(obj))
+    }
+
+    const cancelSave = () =>{
+        setShow(true)
+    }
+    const Edit = () =>{
+        setShow(false)
+    }
+    const handleChange = (e) =>{
+        const { name, value} = e.target;
+        if(name === 'api'){
+            setApi(value)
+        }else{
+            setRpc(value)
+        }
+    }
+
     return  <div>
         <HeaderS>
             <FirstB>
 
                 <Titles>
                     <TitleB>
-                        Add New Postfsf
+                        Local Setting
                     </TitleB>
                     {/*<div>created at 2021-11-10</div>*/}
                     {/*<div>updated at 2021-11-10</div>*/}
@@ -83,20 +124,46 @@ const Setting = ()=>{
             <BrdrTop>
                 <ListBrdr>
                     <div className="titleInner">Apron Node RPC</div>
-                    <div className="inputBr">
-                        <Input placeholder="Apron Node RPC" />
-                    </div>
+                    {
+                        !show&& <div className="inputBr">
+                        <Input placeholder="Apron Node RPC" value={rpc} name="rpc" onChange={handleChange} />
+                        </div>
+                    }
+                    {
+                        show&&<InputText>
+                            {rpc}
+                        </InputText>
+                    }
                 </ListBrdr>
                 <ListBrdr>
                     <div className="titleInner">Apron Gateway Manage API</div>
-                    <div className="inputBr">
-                        <Input placeholder="Apron Gateway Manage API" />
-                    </div>
+                    {
+                        !show&& <div className="inputBr">
+                            <Input placeholder="Apron Gateway Manage API" value={api} name="api" onChange={handleChange} />
+                        </div>
+                    }
+                    {
+                        show&&<InputText>
+                            {api}
+                        </InputText>
+                    }
                 </ListBrdr>
             </BrdrTop>
             <BtnGroup>
-                <Button type="primary">confirm</Button>
-                <Button onClick={()=>ToHome()}>cancel</Button>
+                {
+                    !show&&  <div>
+                        <Button type="primary" onClick={()=>confirmSave()}>confirm</Button>
+                        <Button onClick={()=>cancelSave()}>cancel</Button>
+
+                    </div>
+                }
+                {
+                    show&& <div>
+                        <Button type="primary" onClick={()=>Edit()}>Edit</Button>
+                        <Button onClick={()=>ToHome()}>Back to homepage</Button>
+                    </div>
+                }
+
             </BtnGroup>
         </div>
 

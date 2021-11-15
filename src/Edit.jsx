@@ -1,10 +1,17 @@
 import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 
-import { Input,Button } from 'antd';
+import { Input,Button,Select,Modal } from 'antd';
 import { useNavigate,useParams,useLocation } from 'react-router-dom';
+import { customAlphabet } from 'nanoid';
+import {useSubstrate} from "./api/contracts";
 
+import apiInterface from './api/api';
+
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10);
+const { Option } = Select;
 const { TextArea } = Input;
+
 
 const HeaderS = styled.div`
   display: flex;
@@ -47,10 +54,48 @@ const ListBrdr = styled.div`
   align-items: center;
   margin-bottom: 30px;
   .inputBr{
-  margin-bottom: 0;
+      margin-bottom: 0;
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
   }
- 
 `;
+const ListNew = styled.div`
+  display: flex;
+  align-items: flex-start;
+  line-height: 50px;
+  margin-bottom: 30px;
+  .inputBr{
+      margin-bottom: 0;
+      display: flex;
+      width: 100%;
+      align-items: stretch;
+  }
+  .providers{
+    width: 100%;
+  }
+  .template{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom:20px;
+  }
+`;
+
+const SelectNew = styled(Select)`
+ 
+  display: flex;
+  margin-right: 20px;
+  .ant-select-selector{
+   height: 50px!important;
+   width: 200px!important;
+   border-radius: 4px!important;
+  }
+  .ant-select-selector .ant-select-selection-item,.ant-select-selector .ant-select-selection-placeholder{
+    line-height: 50px;
+  }
+`;
+
 const BtnGroup = styled.div`
   padding: 24px;
    border-top: 1px solid #e1e5eb;
@@ -71,22 +116,84 @@ const ServiceLogo = styled.div`
     line-height: 109px;
     color: #e1e5eb;
     font-size: 26px;
-`
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    .close{
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      font-size: 16px;
+      cursor: pointer;
+      background: rgba(0,0,0,0.6);
+      width: 100%;
+      height: 30px;
+      line-height: 30px;
+      z-index: 99;
+    }
+`;
 
-const Edit = (props)=>{
+const Plusdiv =styled.div`
+    opacity: 0.4;
+    margin-left: 20px;
+    cursor: pointer;
+    font-size: 24px;
+`;
+
+
+const ModalBg = styled(Modal)`
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  .ant-modal-footer{
+    text-align: left;
+    padding: 24px 24px 24px 12px;
+    display: flex;
+ 
+    
+  }
+`;
+
+const ListBrdr2 = styled.div`
+  display: flex;
+  align-items: center;
+  .inputBr{
+      margin-bottom: 0;
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      margin-left: 20px;
+  }
+`;
+const Edit = ()=>{
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const [imgUrl, setimgUrl] = useState('');
     const { id } = useParams();
+    const { state, dispatch } = useSubstrate();
+    const { allAccounts } = state;
+
+    const [schema] = useState(['ws','http']);
+    const [thisId, setThisId] = useState('');
+    const [logo, setLogo] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [name, setName] = useState('');
+    const [desc, setDesc] = useState('');
+    const [price, setPrice] = useState('');
+    const [providers, setProviders] = useState([
+        {
+            schema: undefined,
+            base_url: '',
+        }
+    ]);
 
     useEffect(()=>{
-        // if(pathname.indexOf("edit")>-1){
-        //     let arr = pathname.split('/');
-        //     let id = arr[arr.length-1];
-        //     setNavid(id)
-        // }
-        console.log(id)
-    },[id])
+        console.log(pathname,id)
+        if(pathname.indexOf('edit') !== -1) {
+            setThisId(id)
+
+        }
+    },[pathname])
+
 
     const ToHome = () => {
         if(id){
@@ -96,26 +203,129 @@ const Edit = (props)=>{
         }
 
     }
+    const handleChange = (e) =>{
+        const { name, value} = e.target;
+        switch (name) {
+            case 'logo':
+                setLogo(value);
+                break;
+            case 'name':
+                setName(value);
+                break;
+            case 'desc':
+                setDesc(value);
+                break;
+            case 'price':
+                setPrice(value);
+                break;
+            default:break;
+        }
+    }
+    const handleSelect = (value,index) =>{
+        let obj = [ ...providers];
+        if (index) {
+            obj[index].schema = value;
+        }else{
+            obj.map((item,i) => {
+                if (index === i ){
+                    obj[i].schema = value;
+                }else{
+                    obj[i].schema = undefined;
+                }
+                return item;
+            })
+        }
+        setProviders(obj);
+    }
+    const addOptions = () =>{
+        let obj = [ ...providers];
+        obj.push( {
+            schema: undefined,
+            base_url: '',
+        });
+        setProviders(obj);
+    }
+    const removeOptions = () =>{
+        let obj = [ ...providers];
+        obj.splice(1,1);
+        setProviders(obj)
+    }
+    const handleBaseURL = (e,index) =>{
+        const { value } = e.target;
+
+        let obj = [ ...providers];
+        obj[index].base_url = value;
+        setProviders(obj);
+    }
+    const showUpload = () =>{
+        setShowModal(true)
+    }
+    const noUpload = () =>{
+        setShowModal(false)
+    }
+    const removeLogo = () =>{
+        setLogo('')
+    }
+    const confirmSubmit = async () =>{
+
+        if(allAccounts == null){
+            dispatch({ type: 'SHOW_ERROR', payload: 'Please connect wallet!' });
+            return;
+        }
+
+        let obj = {
+            id: nanoid(),
+            name,
+            desc,
+            logo,
+            user_id: allAccounts[0].address,
+            providers
+        }
+
+        await apiInterface.AddNew(obj).then((data)=>{
+            console.log("==data===",data)
+        })
+    }
+
     return  <div>
+        <ModalBg title="Logo"
+                 visible={showModal}
+                 centered={true}
+                 maskClosable={false}
+                 footer={null}
+                 onCancel={noUpload}
+             >
+            <ListBrdr2>
+                <div className="titleInner">Logo</div>
+                <div className="inputBr">
+                    <Input placeholder="Logo Address" allowClear={true} value={logo} name="logo"  onChange={handleChange}/>
+                </div>
+            </ListBrdr2>
+        </ModalBg>
         <HeaderS>
             <FirstB>
                 {
-                    imgUrl &&  <img src={imgUrl} alt=""/>
+                    logo && <ServiceLogo>
+                        <img src={logo} alt=""/>
+                        <div className="close" onClick={removeLogo}>
+                            <i className="fa fa-trash" />
+                        </div>
+                    </ServiceLogo>
+
                 }
                 {
-                    !imgUrl &&<ServiceLogo>
+                    !logo &&<ServiceLogo onClick={()=>showUpload()}>
                         <i className="fa fa-plus"/>
+
                     </ServiceLogo>
                 }
 
                 <Titles>
                     <TitleB>
                         <div className="inputBr">
-                            <Input placeholder="Service Name" />
+                            <Input placeholder="Service Name" value={name} name="name"  onChange={handleChange}/>
                         </div>
                     </TitleB>
-                    {/*<div>created at 2021-11-10</div>*/}
-                    {/*<div>updated at 2021-11-10</div>*/}
                 </Titles>
             </FirstB>
         </HeaderS>
@@ -126,7 +336,7 @@ const Edit = (props)=>{
                     </div>
                     <div className="content">
                         <div className="inputBr textArea">
-                            <TextArea  />
+                            <TextArea value={desc} name="desc"  onChange={handleChange}/>
                         </div>
                     </div>
                 </div>
@@ -134,24 +344,42 @@ const Edit = (props)=>{
                     <ListBrdr>
                         <div className="titleInner">Price Plan</div>
                         <div className="inputBr">
-                            <Input placeholder="Price Plan" />
+                            <Input placeholder="Price Plan" value={price} name="price"  onChange={handleChange}/>
                         </div>
                     </ListBrdr>
-                    <ListBrdr>
-                        <div className="titleInner">Endpoint</div>
-                        <div className="inputBr">
-                            <Input placeholder="Endpoint" />
+
+                    <ListNew>
+                        <div className="titleInner">Providers</div>
+                        <div className="providers">
+                            {
+                                providers.map((item,index)=>(
+                                    <div className="template" key={index}>
+                                        <div className="inputBr">
+                                            <SelectNew value={item.schema}  onChange={(e)=>handleSelect(e,index)} placeholder="Schema">
+                                                {
+                                                    schema.map(schemaitem=>( <Option key={schemaitem} disabled={index && providers[0].schema === schemaitem} value={schemaitem}>{schemaitem}</Option>))
+                                                }
+                                            </SelectNew>
+                                            <Input placeholder="Base Url" value={item.base_url} name="base_url" onChange={e=>handleBaseURL(e,index)}/>
+                                        </div>
+                                        {
+                                            !index && providers.length < 2  &&  <Plusdiv onClick={()=>addOptions()}>
+                                                <i className="fa fa-plus-square-o"/>
+                                            </Plusdiv>
+                                        }
+                                        {
+                                            !!index  &&  <Plusdiv onClick={()=>removeOptions()}>
+                                                <i className="fa fa-minus-square-o"/>
+                                            </Plusdiv>
+                                        }
+                                    </div>
+                                ))
+                            }
                         </div>
-                    </ListBrdr>
-                    <ListBrdr>
-                        <div className="titleInner">Schema</div>
-                        <div className="inputBr">
-                            <Input placeholder="Schema" />
-                        </div>
-                    </ListBrdr>
+                    </ListNew>
                 </BrdrTop>
                 <BtnGroup>
-                    <Button type="primary">confirm</Button>
+                    <Button type="primary" onClick={()=>confirmSubmit()}>confirm</Button>
                     <Button onClick={()=>ToHome()}>cancel</Button>
                 </BtnGroup>
             </div>

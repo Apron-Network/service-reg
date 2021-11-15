@@ -153,8 +153,10 @@
     "@polkadot/api-contract": "^6.0.5",
     "@polkadot/extension-dapp": "^0.40.3",
     "antd": "^4.16.13",
+    "axios": "^0.24.0",
     "babel-plugin-styled-components": "^1.13.2",
-    "font-awesome": "^4.7.0"
+    "font-awesome": "^4.7.0",
+    "nanoid": "^3.1.30"
   },
   "babel": {
     "presets": [

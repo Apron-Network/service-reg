@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import styled from "styled-components";
 import {useNavigate, useParams} from 'react-router-dom';
 import { Modal } from 'antd';
+import {useSubstrate} from "./api/contracts";
 
 
 const HeaderS = styled.div`
@@ -17,6 +18,7 @@ const FirstB = styled.div`
     border-radius: 110px;
     width: 110px;
     height: 110px;
+    overflow: hidden;
   }
 `;
 
@@ -72,6 +74,13 @@ const ListBrdr = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 30px;
+  .schema{
+    padding-right: 20px;
+  }
+  .lineInner{
+    width: 100%;
+    display: flex;
+  }
   
 `
 const ModalBg = styled(Modal)`
@@ -109,9 +118,17 @@ const TitleTips = styled.div`
 
 const About = ()=>{
     const navigate = useNavigate();
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [imgUrl, setimgUrl] = useState('');
     const { id } = useParams();
+
+    const { state,dispatch } = useSubstrate();
+    const { serviceList, allAccounts } = state;
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [detailLogo, setDetailLogo] = useState('');
+    const [detailName, setDetailName] = useState('');
+    const [detailDesc, setDetailDesc] = useState('');
+    const [detailPrice, setDetailPrice] = useState('');
+    const [detailProviders, setDetailProviders] = useState([]);
 
     useEffect(()=>{
         // if(pathname.indexOf("edit")>-1){
@@ -119,19 +136,37 @@ const About = ()=>{
         //     let id = arr[arr.length-1];
         //     setNavid(id)
         // }
-        console.log("about",id)
-    },[id])
+        console.log("about",id);
+        if(serviceList == null) return;
+       const detail = serviceList.filter(item=>item.id === id);
+       const { name, logo ,desc,price,providers } = detail;
+        setDetailName(name);
+        setDetailLogo(logo);
+        setDetailDesc(desc);
+        setDetailPrice(price);
+        setDetailProviders(providers);
+
+    },[id,serviceList]);
 
     const ToEdit = () => {
+        if(allAccounts == null){
+            dispatch({ type: 'SHOW_ERROR', payload: 'Please connect wallet!' });
+            return;
+        }
         navigate(`/edit/${id}`)
     }
 
     const showModal = () => {
+        if(allAccounts == null){
+            return;
+        }
         setIsModalVisible(true);
     };
 
     const handleOk = () => {
         setIsModalVisible(false);
+        navigate(`/about`)
+
     };
 
     const handleCancel = () => {
@@ -142,22 +177,22 @@ const About = ()=>{
 
         <ModalBg title="Delete Service" centered={true} maskClosable={false} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <TitleH5>Do you want delete the service?</TitleH5>
-        <TitleTips>Polkadot Push Notification</TitleTips>
+        <TitleTips> {detailName}</TitleTips>
     </ModalBg>
         <HeaderS>
             <FirstB>
-                <img src="https://img1.baidu.com/it/u=2353090175,990247533&fm=26&fmt=auto" alt=""/>
+                <img src={detailLogo} alt=""/>
                 <Titles>
                     <TitleB>
-                        Add New Postfsf-{id}
+                        {detailName}
                     </TitleB>
-                    <div>created at 2021-11-10</div>
-                    <div>updated at 2021-11-10</div>
+                    {/*<div>created at 2021-11-10</div>*/}
+                    {/*<div>updated at 2021-11-10</div>*/}
                 </Titles>
             </FirstB>
             <Second>
                 <span className="bg" onClick={()=>ToEdit()}><i className="fa fa-edit" />Edit</span>
-                <span className="bg" onClick={showModal}><i className="fa fa-trash" />Delete</span>
+                <span className="bg" onClick={()=>showModal()}><i className="fa fa-trash" />Delete</span>
             </Second>
         </HeaderS>
 
@@ -167,24 +202,23 @@ const About = ()=>{
                         Description
                     </div>
                     <div className="content">
-                        A decentralized platform that provides infrastructure services for DApp developers,DApp users,and operators.A decentralized platform that provides infrastructure services for DApp developers,DApp users,and operators.A decentralized platform that provides infrastructure services for DApp developers,DApp users,and operators.A decentralized platform that provides infrastructure services for DApp developers,DApp users,and operators.
+                        {detailDesc}
                     </div>
                 </div>
                 <BrdrTop>
                     <ListBrdr>
                         <div className="titleInner">Price Plan</div>
-                        <div>Free</div>
+                        <div>{detailPrice}</div>
                     </ListBrdr>
                     <ListBrdr>
-                        <div className="titleInner">Endpoint</div>
-                        <div>api.example.com</div>
-                    </ListBrdr>
-                    <ListBrdr>
-                        <div className="titleInner">Schema</div>
-                        <div>websocket</div>
+                        <div className="titleInner">Providers</div>
+                        {
+                            detailProviders.map(p=>(<div className="lineInner">
+                                <div className="schema">{p.schema}</div><div className="base">{p.base_url}</div>
+                            </div>))
+                        }
                     </ListBrdr>
                 </BrdrTop>
-
             </div>
 
         </div>;
