@@ -95,7 +95,7 @@ const NavBar = ()=>{
             let arr = pathname.split('/');
             let id = arr[arr.length-1];
             if(id === 'about' ||id === '' ){
-                ToUrl('/about','456')
+                ToUrl('/about',serviceList.data[0].id)
                 return;
             }
             setNavid(id)
@@ -104,7 +104,7 @@ const NavBar = ()=>{
 
     useEffect(()=>{
         if(serviceList == null) return;
-        setList(serviceList)
+        setList(serviceList.data)
     },[serviceList]);
 
     const ToUrl = (url,id) => {
@@ -138,9 +138,6 @@ const NavBar = ()=>{
                         <li key={item.id} className={navid === item.id?'active': ''} onClick={()=>ToUrl('/about',item.id)}>{item.name}</li>
                     ))
                 }
-
-                <li className={navid === '456'?'active': ''}  onClick={()=>ToUrl('/about','456')}>service1</li>
-                <li className={navid === '789'?'active': ''} onClick={()=>ToUrl('/about','789')}>service1</li>
             </Lft>
         </div>
         <Setting onClick={()=>ToUrl('/setting')}>

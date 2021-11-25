@@ -59,6 +59,7 @@ const HeaderTop = ()=>{
         let selectedStorage = JSON.parse(sessionStorage.getItem('account'));
         if (selectedStorage) {
             setselected(selectedStorage)
+            dispatch({ type: 'SET_ALLACCOUNTS', payload: selectedStorage });
         }
     }, []);
 
@@ -83,7 +84,7 @@ const HeaderTop = ()=>{
     }
 
     const exitAccount = () => {
-        // sessionStorage.removeItem('account');
+        sessionStorage.removeItem('account');
         dispatch({ type: 'LOAD_ALLACCOUNTS' });
         setselected([]);
         window.location.reload()

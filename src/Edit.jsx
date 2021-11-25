@@ -170,7 +170,7 @@ const Edit = ()=>{
     const { pathname } = useLocation();
     const { id } = useParams();
     const { state, dispatch } = useSubstrate();
-    const { allAccounts } = state;
+    const { allAccounts,serviceList } = state;
 
     const [schema] = useState(['ws','http']);
     const [thisId, setThisId] = useState('');
@@ -193,6 +193,20 @@ const Edit = ()=>{
 
         }
     },[pathname])
+
+    useEffect(()=>{
+        if ( serviceList == null) return;
+        const detail = serviceList.data.filter(item => item.id === id);
+        console.log("=====detail",detail[0])
+        if(detail.length){
+            const { name, logo ,desc,price,providers } = detail[0];
+            setName(name);
+            setLogo(logo);
+            setDesc(desc);
+            setPrice(price);
+            setProviders(providers);
+        }
+    },[thisId,serviceList])
 
 
     const ToHome = () => {
@@ -272,19 +286,26 @@ const Edit = ()=>{
             dispatch({ type: 'SHOW_ERROR', payload: 'Please connect wallet!' });
             return;
         }
+        console.log("confirmSubmit====",thisId)
+        if(thisId){
 
-        let obj = {
-            id: nanoid(),
-            name,
-            desc,
-            logo,
-            user_id: allAccounts[0].address,
-            providers
+        }else{
+            let obj = {
+                id: nanoid(),
+                name,
+                desc,
+                logo,
+                user_id: allAccounts[0].address,
+                providers
+            }
+
+            await apiInterface.AddNew(obj).then((data)=>{
+                console.log("==data===",data)
+                navigate(`/`)
+            })
         }
 
-        await apiInterface.AddNew(obj).then((data)=>{
-            console.log("==data===",data)
-        })
+
     }
 
     return  <div>

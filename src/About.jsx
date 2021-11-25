@@ -72,7 +72,7 @@ const BrdrTop = styled.div`
 `
 const ListBrdr = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 30px;
   .schema{
     padding-right: 20px;
@@ -136,15 +136,18 @@ const About = ()=>{
         //     let id = arr[arr.length-1];
         //     setNavid(id)
         // }
-        console.log("about",id);
-        if(serviceList == null) return;
-       const detail = serviceList.filter(item=>item.id === id);
-       const { name, logo ,desc,price,providers } = detail;
-        setDetailName(name);
-        setDetailLogo(logo);
-        setDetailDesc(desc);
-        setDetailPrice(price);
-        setDetailProviders(providers);
+        console.log("about",id,serviceList);
+        if(!serviceList || serviceList.data == null) return;
+       const detail = serviceList.data.filter(item=>item.id === id);
+       console.log("=====detail",detail[0])
+        if(detail.length){
+            const { name, logo ,desc,price,providers } = detail[0];
+            setDetailName(name);
+            setDetailLogo(logo);
+            setDetailDesc(desc);
+            setDetailPrice(price);
+            setDetailProviders(providers);
+        }
 
     },[id,serviceList]);
 
@@ -212,11 +215,14 @@ const About = ()=>{
                     </ListBrdr>
                     <ListBrdr>
                         <div className="titleInner">Providers</div>
-                        {
-                            detailProviders.map(p=>(<div className="lineInner">
-                                <div className="schema">{p.schema}</div><div className="base">{p.base_url}</div>
-                            </div>))
-                        }
+                        <div>
+                            {
+                                !!detailProviders.length && detailProviders.map(p=>(<div className="lineInner" key={p.schema}>
+                                    <div className="schema">{p.schema}</div><div className="base">{p.base_url}</div>
+                                </div>))
+                            }
+                        </div>
+
                     </ListBrdr>
                 </BrdrTop>
             </div>
