@@ -1,7 +1,7 @@
 import React, { useState,useEffect} from "react";
 import styled from "styled-components";
 import LogoImg from "../assets/images/apron_logo.svg"
-import {useNavigate, useParams,useLocation} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import {useSubstrate} from "../api/contracts";
 
 const NavBrdr = styled.div`
@@ -77,38 +77,41 @@ const AddBar = styled.div`
 
 const NavBar = ()=>{
     const navigate = useNavigate();
-    const { id } = useParams();
+
     const { pathname } = useLocation();
 
     const { state,dispatch } = useSubstrate();
     const {serviceList, allAccounts} = state;
     const [navid, setNavid] = useState('');
     const [list, setList] = useState([
-        {
-           id:'',
-           name:''
-        }
+
     ]);
 
     useEffect(()=>{
+        if(serviceList==null)return;
         if(pathname.indexOf("about")>-1){
             let arr = pathname.split('/');
             let id = arr[arr.length-1];
-            if(id === 'about' ||id === '' ){
-                ToUrl('/about',serviceList.data[0].id)
+            if(serviceList.data.length && id ==='about' ){
+                ToUrl(`/about`,serviceList.data[0].id);
                 return;
+            }else if(!serviceList.data.length){
+                ToUrl('/add')
             }
             setNavid(id)
         }
-    },[pathname]);
+    },[pathname,serviceList]);
 
     useEffect(()=>{
-        if(serviceList == null) return;
-        setList(serviceList.data)
+        if(serviceList == null){
+            dispatch({ type: 'RELOAD_SERVICE_LIST', payload: true });
+            return;
+        }
+        let arr = [...serviceList.data]
+        setList(arr)
     },[serviceList]);
 
     const ToUrl = (url,id) => {
-
         if(id){
             navigate(`${url}/${id}`);
         }else{
@@ -134,7 +137,7 @@ const NavBar = ()=>{
             </AddBar>
             <Lft>
                 {
-                    !!list.length && list.map(item=>(
+                     list.map(item=>(
                         <li key={item.id} className={navid === item.id?'active': ''} onClick={()=>ToUrl('/about',item.id)}>{item.name}</li>
                     ))
                 }

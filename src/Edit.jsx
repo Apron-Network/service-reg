@@ -178,7 +178,7 @@ const Edit = ()=>{
     const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState('');
     const [desc, setDesc] = useState('');
-    const [price, setPrice] = useState('');
+    const [price_plan, setPricePlan] = useState('');
     const [providers, setProviders] = useState([
         {
             schema: undefined,
@@ -197,13 +197,12 @@ const Edit = ()=>{
     useEffect(()=>{
         if ( serviceList == null) return;
         const detail = serviceList.data.filter(item => item.id === id);
-        console.log("=====detail",detail[0])
         if(detail.length){
-            const { name, logo ,desc,price,providers } = detail[0];
+            const { name, logo ,desc,price_plan,providers } = detail[0];
             setName(name);
             setLogo(logo);
             setDesc(desc);
-            setPrice(price);
+            setPricePlan(price_plan);
             setProviders(providers);
         }
     },[thisId,serviceList])
@@ -229,8 +228,8 @@ const Edit = ()=>{
             case 'desc':
                 setDesc(value);
                 break;
-            case 'price':
-                setPrice(value);
+            case 'price_plan':
+                setPricePlan(value);
                 break;
             default:break;
         }
@@ -281,31 +280,29 @@ const Edit = ()=>{
         setLogo('')
     }
     const confirmSubmit = async () =>{
-
         if(allAccounts == null){
             dispatch({ type: 'SHOW_ERROR', payload: 'Please connect wallet!' });
             return;
         }
-        console.log("confirmSubmit====",thisId)
+        let obj = {
+            name,
+            desc,
+            logo,
+            price_plan,
+            user_id: allAccounts[0].address,
+            providers
+        };
         if(thisId){
-
+            obj.id = thisId;
         }else{
-            let obj = {
-                id: nanoid(),
-                name,
-                desc,
-                logo,
-                user_id: allAccounts[0].address,
-                providers
-            }
-
-            await apiInterface.AddNew(obj).then((data)=>{
-                console.log("==data===",data)
-                navigate(`/`)
-            })
+            obj.id = nanoid();
         }
-
-
+        dispatch({ type: 'SET_LOADING', payload: true });
+        await apiInterface.AddNew(obj).then((data)=>{
+            dispatch({ type: 'SET_LOADING', payload: null });
+            dispatch({ type: 'RELOAD_SERVICE_LIST', payload: true });
+            navigate(`/about/${obj.id}`)
+        })
     }
 
     return  <div>
@@ -365,7 +362,7 @@ const Edit = ()=>{
                     <ListBrdr>
                         <div className="titleInner">Price Plan</div>
                         <div className="inputBr">
-                            <Input placeholder="Price Plan" value={price} name="price"  onChange={handleChange}/>
+                            <Input placeholder="Price Plan" value={price_plan} name="price_plan"  onChange={handleChange}/>
                         </div>
                     </ListBrdr>
 

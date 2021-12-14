@@ -4,5 +4,7 @@ module.exports = {
 
     serviceList:null,
     errorTips:null,
+    reloadList: null,
+    loading: null
 
 };

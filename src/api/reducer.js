@@ -13,9 +13,14 @@ const reducer = (state, action) => {
 
         case 'SERVICE_LIST':
             return { ...state, serviceList: action.payload };
+        case 'RELOAD_SERVICE_LIST':
+            return { ...state, reloadList: action.payload };
 
         case 'SHOW_ERROR':
             return { ...state, errorTips: action.payload };
+
+        case 'SET_LOADING':
+            return { ...state, loading: action.payload };
 
 
         default:

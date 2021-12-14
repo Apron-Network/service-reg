@@ -4,6 +4,7 @@ import { useSubstrate } from "../api/contracts";
 import Accounts from '../api/Account';
 import apiInterface from '../api/api';
 import { Button, Select, Alert } from 'antd';
+import { Loading3QuartersOutlined } from '@ant-design/icons';
 
 const AlertBg = styled(Alert)`
     position: fixed;
@@ -42,25 +43,49 @@ const Logout = styled.span`
   cursor: pointer;
 `;
 
+const Mask = styled('div')`
+    position: fixed;
+    z-index: 9999;
+    background:rgba(0,0,0,0.5);
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
 const HeaderTop = ()=>{
     const { dispatch, state } = useSubstrate();
-    const { errorTips,allAccounts } = state;
+    const { errorTips,reloadList,loading } = state;
 
     const [allList, setallList] = useState([]);
     const [selected, setselected] = useState([]);
 
 
     useEffect(()=>{
-        apiInterface.getList().then(data=>{
-            dispatch({ type: 'SERVICE_LIST', payload: data });
-        })
-    },[]);
+        console.log("===reloadList==",reloadList)
+        if(reloadList === false) return;
+        const getData = async () =>{
+            dispatch({ type: 'SET_LOADING', payload: true });
+           await apiInterface.getList().then(data=>{
+                dispatch({ type: 'SERVICE_LIST', payload: data });
+                dispatch({ type: 'RELOAD_SERVICE_LIST', payload: false });
+                dispatch({ type: 'SET_LOADING', payload: null });
+            }).catch(err=>{
+                console.error("======",err)
+               getData();
+            })
+        }
+        getData();
+    },[reloadList]);
     useEffect(() => {
         let selectedStorage = JSON.parse(sessionStorage.getItem('account'));
         if (selectedStorage) {
             setselected(selectedStorage)
             dispatch({ type: 'SET_ALLACCOUNTS', payload: selectedStorage });
         }
+        dispatch({ type: 'RELOAD_SERVICE_LIST', payload: true });
     }, []);
 
     const connectWallet = async () => {
@@ -92,8 +117,14 @@ const HeaderTop = ()=>{
     }
     return <div>
         {
-             errorTips!=null &&  <AlertBg message="Error" type="error" message={errorTips} showIcon />
+             errorTips!=null &&  <AlertBg  type="error" message={errorTips} showIcon />
         }
+        {
+            loading !=null &&<Mask>
+                <Loading3QuartersOutlined style={{ fontSize: 100, color: 'rgba(255,255,255,0.6)' }} spin  />
+            </Mask>
+        }
+
         <RhtTop>
             {
                 !selected.length && !allList.length && <Button type="primary" onClick={() => connectWallet()}>Connect Wallet</Button>

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import {useNavigate, useParams} from 'react-router-dom';
 import { Modal } from 'antd';
 import {useSubstrate} from "./api/contracts";
+import apiInterface from "./api/api";
 
 
 const HeaderS = styled.div`
@@ -139,13 +140,12 @@ const About = ()=>{
         console.log("about",id,serviceList);
         if(!serviceList || serviceList.data == null) return;
        const detail = serviceList.data.filter(item=>item.id === id);
-       console.log("=====detail",detail[0])
         if(detail.length){
-            const { name, logo ,desc,price,providers } = detail[0];
+            const { name, logo ,desc,price_plan,providers } = detail[0];
             setDetailName(name);
             setDetailLogo(logo);
             setDetailDesc(desc);
-            setDetailPrice(price);
+            setDetailPrice(price_plan);
             setDetailProviders(providers);
         }
 
@@ -166,9 +166,27 @@ const About = ()=>{
         setIsModalVisible(true);
     };
 
-    const handleOk = () => {
+    const handleOk = async () => {
         setIsModalVisible(false);
-        navigate(`/about`)
+
+        let obj ={
+            id
+        }
+
+        dispatch({ type: 'SET_LOADING', payload: true });
+        await apiInterface.deleteService(obj).then((data)=>{
+            console.log("==data===",data)
+
+            setTimeout(()=>{
+                dispatch({ type: 'RELOAD_SERVICE_LIST', payload: true });
+                dispatch({ type: 'SET_LOADING', payload: null });
+                navigate(`/about`)
+                window.location.reload()
+
+            },100)
+
+        })
+
 
     };
 
@@ -217,7 +235,7 @@ const About = ()=>{
                         <div className="titleInner">Providers</div>
                         <div>
                             {
-                                !!detailProviders.length && detailProviders.map(p=>(<div className="lineInner" key={p.schema}>
+                                !!detailProviders.length && detailProviders.map((p,index)=>(<div className="lineInner" key={`${p.schema}_${index}`}>
                                     <div className="schema">{p.schema}</div><div className="base">{p.base_url}</div>
                                 </div>))
                             }

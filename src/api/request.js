@@ -26,8 +26,10 @@ const get = urlMethod => axiosInstance(host + urlMethod).get(host + urlMethod);
 
 const post = (urlMethod, payload) => axiosInstance(host + urlMethod).post(host + urlMethod, payload);
 
+const deleteId = (urlMethod, payload) => axiosInstance(host + urlMethod).delete(host + urlMethod, { "data": payload });
 
 export default {
   get,
   post,
+  deleteId,
 };
