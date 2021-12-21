@@ -43,6 +43,9 @@ const GlobalStyle = createGlobalStyle`
           font-size: 14px;
         }
     }
+    .mt30{
+    margin-top: 20px;
+    }
    .inputBr{
         margin-bottom: 10px;
         min-width:300px;

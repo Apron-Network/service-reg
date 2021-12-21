@@ -130,6 +130,7 @@ const About = ()=>{
     const [detailDesc, setDetailDesc] = useState('');
     const [detailPrice, setDetailPrice] = useState('');
     const [detailProviders, setDetailProviders] = useState([]);
+    const [detailid, setDetailid] = useState([]);
 
     useEffect(()=>{
         // if(pathname.indexOf("edit")>-1){
@@ -147,6 +148,7 @@ const About = ()=>{
             setDetailDesc(desc);
             setDetailPrice(price_plan);
             setDetailProviders(providers);
+            setDetailid(detail[0].id);
         }
 
     },[id,serviceList]);
@@ -244,6 +246,22 @@ const About = ()=>{
                     </ListBrdr>
                 </BrdrTop>
             </div>
+        {
+            allAccounts != null &&   <div className="cardB mt30">
+                <div>
+                    <div className="titleTxt">
+                        API Endpoints
+                    </div>
+                    <div className="content">
+                        {
+                            !!detailProviders.length && detailProviders.map((p,index)=>(<div className="lineInner" key={`${p.schema}_${index}`}>
+                                <div className="base">{`${p.base_url}/${detailid}${allAccounts[0].address}`}</div>
+                            </div>))
+                        }
+                    </div>
+                </div>
+            </div>
+        }
 
         </div>;
 };
