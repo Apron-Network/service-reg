@@ -255,7 +255,7 @@ const About = ()=>{
                     <div className="content">
                         {
                             !!detailProviders.length && detailProviders.map((p,index)=>(<div className="lineInner" key={`${p.schema}_${index}`}>
-                                <div className="base">{`${p.base_url}/${detailid}${allAccounts[0].address}`}</div>
+                                <div className="base">{`http://localhost:8081/${detailid}${allAccounts[0].address}`}</div>
                             </div>))
                         }
                     </div>
